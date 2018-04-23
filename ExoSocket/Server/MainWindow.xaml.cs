@@ -24,15 +24,5 @@ namespace Server
         {
             InitializeComponent();
         }
-
-        private void bSwitchServerState_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void bSend_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

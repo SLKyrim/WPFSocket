@@ -5,9 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Client"
         mc:Ignorable="d"
-        WindowStartupLocation="CenterScreen"
-        Title="脑机接口客户端" Icon="../Client/Images/Client.ico"
-        Height="500" Width="900" MinHeight="500" MinWidth="900">
+        Title="MainWindow" Height="350" Width="525">
     <Grid>
         
     </Grid>
