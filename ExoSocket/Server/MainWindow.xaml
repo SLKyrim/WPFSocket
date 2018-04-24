@@ -8,7 +8,7 @@
         WindowStartupLocation="CenterScreen"
         Title="脑机接口服务器"
         Height="500" Width="900" MinHeight="500" MinWidth="900"
-        Closing="Window_Closing">
+        Loaded="Window_Loaded" Closing="Window_Closing">
 
     <DockPanel Background="White">
         <!--状态栏-->
