@@ -16,6 +16,7 @@ using System.Windows.Threading;
 using System.Net.Sockets;
 using System.Threading;
 using System.Net;
+using System.Runtime.InteropServices;
 
 namespace Server
 {
@@ -28,6 +29,9 @@ namespace Server
         private TcpListener server;
         private TcpClient client;
         private const int bufferSiize = 8000;
+
+        [DllImport("C:\\Users\\Long\\Desktop\\ExoSocket\\Labview\\DLL\\SharedLib.dll", EntryPoint = "Add")]
+        public extern static double Add(double x, double y);
 
         public MainWindow()
         {
@@ -70,26 +74,44 @@ namespace Server
 
         private void Switch_Button_Click(object sender, RoutedEventArgs e) //启动服务器
         {
-            if (IPAdressTextBox.Text.Trim() == string.Empty)
-            {
-                ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "请填入服务器IP地址\n");
-                return;
-            }
-            if (PortTextBox.Text.Trim() == string.Empty)
-            {
-                ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "请填入服务器端口号\n");
-                return;
-            }
+            Button bt = sender as Button;
 
-            Thread thread = new Thread(reciveAndListener);
             IpAndPort ipAndport = new IpAndPort();
             ipAndport.Ip = IPAdressTextBox.Text;
             ipAndport.Port = PortTextBox.Text;
 
-            thread.Start((object)ipAndport);
-            
-            ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "服务器 " + ipAndport.Ip + " : " + ipAndport.Port + " 已开启监听\n");
-            statusInfoTextBlock.Text = "服务器已启动";
+            if (bt.Content.ToString() == "启动服务器")
+            {
+                if (IPAdressTextBox.Text.Trim() == string.Empty)
+                {
+                    ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "请填入服务器IP地址\n");
+                    return;
+                }
+                if (PortTextBox.Text.Trim() == string.Empty)
+                {
+                    ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "请填入服务器端口号\n");
+                    return;
+                }
+
+                double z = Add(21.0, 3.0);
+                ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), z.ToString() + "\n");
+
+                Thread thread = new Thread(reciveAndListener);            
+                thread.Start((object)ipAndport);
+
+                ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "服务器 " + ipAndport.Ip + " : " + ipAndport.Port + " 已开启监听\n");
+                statusInfoTextBlock.Text = "服务器已启动";
+                bt.Content = "关闭服务器";
+            }
+
+            else
+            {
+                server.Stop();
+                ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "服务器 " + ipAndport.Ip + " : " + ipAndport.Port + " 已关闭\n");
+                statusInfoTextBlock.Text = "服务器已关闭";
+                bt.Content = "启动服务器";
+            }
+
         }
 
         private void reciveAndListener(object ipAndPort)
