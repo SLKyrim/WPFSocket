@@ -93,8 +93,9 @@ namespace Server
                     return;
                 }
 
-                double z = Add(21.0, 3.0);
-                ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), z.ToString() + "\n");
+                // 测试labview简单加法
+                //double z = Add(21.0, 3.0);
+                //ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "Labview加法器传来结果：" + z.ToString() + "\n");
 
                 Thread thread = new Thread(reciveAndListener);            
                 thread.Start((object)ipAndport);
