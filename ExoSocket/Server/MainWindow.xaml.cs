@@ -157,11 +157,27 @@ namespace Server
 
         private void Send_Button_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageTextBox.Text.Trim() != string.Empty)
+            //if (MessageTextBox.Text.Trim() != string.Empty)
+            //{
+            //    NetworkStream sendStream = client.GetStream();
+            //    byte[] buffer = Encoding.Default.GetBytes(MessageTextBox.Text.Trim());
+            //    sendStream.Write(buffer, 0, buffer.Length);
+            //    MessageTextBox.Text = string.Empty;
+            //}
+
+            if (client != null)
             {
+                //要发送的信息
+                if (MessageTextBox.Text.Trim() == string.Empty)
+                    return;
+                string msg = MessageTextBox.Text.Trim();
+
+                byte[] buffer = Encoding.Default.GetBytes(msg);
+
                 NetworkStream sendStream = client.GetStream();
-                byte[] buffer = Encoding.Default.GetBytes(MessageTextBox.Text.Trim());
                 sendStream.Write(buffer, 0, buffer.Length);
+
+                ComWinTextBox.AppendText("发送给客户端的数据：" + msg + "\n");
                 MessageTextBox.Text = string.Empty;
             }
         }

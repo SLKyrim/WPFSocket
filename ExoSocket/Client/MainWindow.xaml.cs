@@ -122,10 +122,9 @@ namespace Client
                 string msg = MessageTextBox.Text.Trim();
 
                 byte[] buffer = Encoding.Default.GetBytes(msg);
-                //lock (sendStream)
-                //{
+
                 sendStream.Write(buffer, 0, buffer.Length);
-                //}
+
                 ComWinTextBox.AppendText("发送给服务端的数据：" + msg + "\n");
                 MessageTextBox.Text = string.Empty;
             }
