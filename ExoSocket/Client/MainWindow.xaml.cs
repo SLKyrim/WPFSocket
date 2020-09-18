@@ -24,10 +24,12 @@ namespace Client
     /// </summary>
     public partial class MainWindow : Window
     {
-        public delegate void showData(string msg); //通信窗口输出相关
-        TcpClient client;
-        NetworkStream sendStream;
+        private delegate void showData(string msg); //通信窗口输出相关
+        private TcpClient client;
+        private NetworkStream sendStream;
         private const int bufferSize = 8000;
+
+        private Thread thread;
 
         public MainWindow()
         {
@@ -40,6 +42,9 @@ namespace Client
             dateTimer.Tick += new EventHandler(dateTimer_Tick);
             dateTimer.Interval = new TimeSpan(0, 0, 0, 1, 0);
             dateTimer.Start();
+
+            thread = new Thread(ListenerServer);
+            thread.IsBackground = true;            
         }
 
         private void dateTimer_Tick(object sender, EventArgs e)//取当前时间的委托
@@ -59,27 +64,60 @@ namespace Client
 
         private void Switch_Button_Click(object sender, RoutedEventArgs e) //请求连接
         {
-            if (IPAdressTextBox.Text.Trim() == string.Empty)
-            {
-                ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "请填入服务器IP地址\n");
-                return;
-            }
-            if (PortTextBox.Text.Trim() == string.Empty)
-            {
-                ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "请填入服务器端口号\n");
-                return;
-            }
+            Button bt = sender as Button;
 
-            IPAddress ip = IPAddress.Parse(IPAdressTextBox.Text);
-            client = new TcpClient();
-            ComWinTextBox.AppendText("开始连接服务端....\n");
-            client.Connect(ip, int.Parse(PortTextBox.Text));
-            ComWinTextBox.AppendText("已经连接服务端\n");
-            statusInfoTextBlock.Text = "已与服务器建立连接";
+            if (bt.Content.ToString() == "请求连接")
+            {
+                if (IPAdressTextBox.Text.Trim() == string.Empty)
+                {
+                    ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "请填入服务器IP地址\n");
+                    return;
+                }
+                if (PortTextBox.Text.Trim() == string.Empty)
+                {
+                    ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "请填入服务器端口号\n");
+                    return;
+                }
 
-            sendStream = client.GetStream();
-            Thread thread = new Thread(ListenerServer);
-            thread.Start();
+                try
+                {
+                    IPAddress ip = IPAddress.Parse(IPAdressTextBox.Text);                   
+                    ComWinTextBox.AppendText("开始连接服务端....\n");
+                    client = new TcpClient();
+                    client.Connect(ip, int.Parse(PortTextBox.Text));
+                    ComWinTextBox.AppendText("已经连接服务端\n");
+                    statusInfoTextBlock.Text = "已与服务器建立连接";
+
+                    sendStream = client.GetStream();
+
+                    if ((thread.ThreadState == ThreadState.Aborted))
+                    {
+                        thread = new Thread(ListenerServer);
+                        thread.IsBackground = true;
+                    }
+                    if (thread.ThreadState == (ThreadState.Unstarted | ThreadState.Background))
+                    {
+                        thread.Start();
+                    }
+
+                    bt.Content = "断开连接";
+                }
+                catch
+                {
+                    ComWinTextBox.AppendText("连接服务端失败\n");
+                    statusInfoTextBlock.Text = "与服务器建立连接失败";
+                }
+            }
+            else
+            {
+                thread.Abort();
+                //sendStream.Close();
+                client.Close();
+                client = null;
+                bt.Content = "请求连接";
+                ComWinTextBox.AppendText("已与服务器断开连接\n");
+                statusInfoTextBlock.Text = "已与服务器断开连接";
+            }
         }
 
         private void ListenerServer()
@@ -101,7 +139,9 @@ namespace Client
                 }
                 catch
                 {
-                    ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "报错\n");
+                    ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "服务器关闭，断开连接\n");
+                    //statusInfoTextBlock.Text = "服务器关闭，断开连接";
+                    break;
                 }
 
             } while (true);
@@ -122,6 +162,11 @@ namespace Client
 
                 ComWinTextBox.AppendText("发送给服务端的数据：" + msg + "\n");
                 MessageTextBox.Text = string.Empty;
+            }
+            else
+            {
+                ComWinTextBox.AppendText("未连接服务器，无法发送数据\n");
+                statusInfoTextBlock.Text = "未连接服务器，无法发送数据\n";
             }
         }
 

@@ -25,10 +25,12 @@ namespace Server
     /// </summary>
     public partial class MainWindow : Window
     {
-        public delegate void showData(string msg); //通信窗口输出相关
+        private delegate void showData(string msg); //通信窗口输出相关
         private TcpListener server;
         private TcpClient client;
         private const int bufferSiize = 8000;
+        private Thread thread;
+        private bool isOpen = false;
 
         [DllImport("C:\\Users\\Long\\Desktop\\ExoSocket\\Labview\\DLL\\SharedLib.dll", EntryPoint = "Add")]
         public extern static double Add(double x, double y);
@@ -44,6 +46,9 @@ namespace Server
             dateTimer.Tick += new EventHandler(dateTimer_Tick);
             dateTimer.Interval = new TimeSpan(0, 0, 0, 1, 0);
             dateTimer.Start();
+
+            thread = new Thread(reciveAndListener);
+            thread.IsBackground = true;
         }
 
         private void dateTimer_Tick(object sender, EventArgs e)//取当前时间的委托
@@ -59,11 +64,6 @@ namespace Server
                 now.Second.ToString("00"));
 
             timeDateTextBlock.Text = timeDateString;
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            server.Stop();
         }
 
         struct IpAndPort
@@ -97,17 +97,34 @@ namespace Server
                 //double z = Add(21.0, 3.0);
                 //ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "Labview加法器传来结果：" + z.ToString() + "\n");
 
-                Thread thread = new Thread(reciveAndListener);            
-                thread.Start((object)ipAndport);
+                try
+                {
+                    if ((thread.ThreadState == ThreadState.Aborted))
+                    {
+                        thread = new Thread(reciveAndListener);
+                        thread.IsBackground = true;
+                    }
+                    if (thread.ThreadState == (ThreadState.Unstarted | ThreadState.Background))
+                    {
+                        isOpen = true;
+                        thread.Start((object)ipAndport);
+                    }
 
-                ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "服务器 " + ipAndport.Ip + " : " + ipAndport.Port + " 已开启监听\n");
-                statusInfoTextBlock.Text = "服务器已启动";
+                    ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "服务器 " + ipAndport.Ip + " : " + ipAndport.Port + " 已开启监听\n");
+                    statusInfoTextBlock.Text = "服务器已启动";
+                }
+                catch
+                {
+                    ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "服务器打开失败");
+                    statusInfoTextBlock.Text = "服务器打开失败";
+                }
+
                 bt.Content = "关闭服务器";
             }
 
             else
             {
-                server.Stop();
+                isOpen = false;
                 ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "服务器 " + ipAndport.Ip + " : " + ipAndport.Port + " 已关闭\n");
                 statusInfoTextBlock.Text = "服务器已关闭";
                 bt.Content = "启动服务器";
@@ -150,7 +167,7 @@ namespace Server
                     ComWinTextBox.Dispatcher.Invoke(new showData(ComWinTextBox.AppendText), "出现异常：连接被迫关闭\n");
                     break;
                 }
-            } while (true);
+            } while (isOpen);
             #endregion
         }
 
