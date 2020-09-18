@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:Server"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="脑机接口服务器"
-        Height="500" Width="900" MinHeight="500" MinWidth="900"
-        Loaded="Window_Loaded" Closing="Window_Closing">
+        Title="服务器"
+        Height="500" Width="900"
+        Loaded="Window_Loaded" Closed="Window_Closed">
 
     <DockPanel Background="White">
         <!--状态栏-->
@@ -37,7 +37,7 @@
                                                 <ColumnDefinition Width="6*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Margin="2" Text="IP地址" FontSize="12"/>
-                                            <TextBox Name="IPAdressTextBox" Text="172.20.10.132"  Margin="2" Grid.Column="1" Grid.Row="0"/>
+                                            <TextBox Name="IPAdressTextBox" Text="127.0.0.1"  Margin="2" Grid.Column="1" Grid.Row="0"/>
                                         </Grid>
                                         <Grid DockPanel.Dock="Top">
                                             <Grid.ColumnDefinitions>
@@ -45,7 +45,7 @@
                                                 <ColumnDefinition Width="6*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Margin="2" Text="端口号" FontSize="12"/>
-                                            <TextBox Name="PortTextBox" Text="4484"  Margin="2" Grid.Column="1" Grid.Row="0"/>
+                                            <TextBox Name="PortTextBox" Text="5960"  Margin="2" Grid.Column="1" Grid.Row="0"/>
                                         </Grid>
                                         <Button x:Name="Switch_Button" Click="Switch_Button_Click" DockPanel.Dock="Bottom" Width="150" Content="启动服务器" Margin="3" Padding="3"/>
                                     </DockPanel>

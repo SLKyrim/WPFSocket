@@ -57,11 +57,6 @@ namespace Client
             timeDateTextBlock.Text = timeDateString;
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Environment.Exit(0);
-        }
-
         private void Switch_Button_Click(object sender, RoutedEventArgs e) //请求连接
         {
             if (IPAdressTextBox.Text.Trim() == string.Empty)
@@ -133,6 +128,12 @@ namespace Client
         private void ComWinTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ComWinTextBox.ScrollToEnd(); //当通信窗口内容有变化时保持滚动条在最下面
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            client.Close();
+            client = null;
         }
     }
 }

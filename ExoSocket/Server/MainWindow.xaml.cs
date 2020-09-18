@@ -186,5 +186,13 @@ namespace Server
         {
             ComWinTextBox.ScrollToEnd(); //当通信窗口内容有变化时保持滚动条在最下面
         }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            server.Stop();
+            server = null;
+            client.Close();
+            client = null;
+        }
     }
 }
